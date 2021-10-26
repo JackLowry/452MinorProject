@@ -4,10 +4,16 @@ import random
 
 import mysql.connector #import SQL
 
+
 mydb = mysql.connector.connect(host = "localhost", user = "root", passwd = "3072", database ="FreshFood_Database") #connect to database, bad practive since problems with multiple connecctions and errors can occur, but fine for single user only
 mycursor = mydb.cursor()
 
+
 restaurants = ["Applebees", "Olive Garden", "McDonalds", "Popeyes"]
+
+currentRestaurant = None #will update one a Restaurant is selected
+currentUser = None #will update when  a user logs in
+
 app = Flask(__name__)
 
 print(__name__) 
@@ -15,7 +21,18 @@ print(__name__)
 @app.route('/', methods=['GET', 'POST']) #someone has visited base url and we have to provide information
 def login(): #return some object to be displayed to the user | general python syntax for defining a function
     if request.method == 'POST':
-        return redirect(url_for('dropdown'))
+        name = request.form.get('UserName')
+        password = request.form.get('Password')
+        mycursor.execute("SELECT username, user_password, User_ID FROM User_Profile WHERE username = %s and user_password = %s;", (name,password))
+        result = mycursor.fetchone()
+        global currentUser
+        if (result == None):
+            return redirect(url_for('login'))
+        if(name == result[0] and password == result[1]):
+            currentUser = result[2]
+            return redirect(url_for('dropdown'))
+        else:
+            return redirect(url_for('login'))
     return render_template('home.html') #name='Irfan'
 
 @app.route('/about')
@@ -45,16 +62,30 @@ def registration_form():
 @app.route('/Restaurant', methods=['GET', 'POST'])
 def dropdown():
     if request.method == 'POST':
+        rest = request.form.get("Restaurants")
+        global currentRestaurant
+        mycursor.execute("SELECT RestaurantID FROM Restaurant where RestaurantName = '"+ rest +"';")
+        result = mycursor.fetchone()
+        currentRestaurant = result[0]
+        print(currentRestaurant)
         return redirect(url_for('menu'))
-    return render_template('dropdown.html', content = ["Applebees", "Olive Garden", "McDonalds", "Popeyes"])
+    mycursor.execute("select  RestaurantName from Restaurant;")
+    result = mycursor.fetchall()
+    rows=[i[0] for i in result]
+    return render_template('dropdown.html', content = rows)
 
 @app.route('/menu', methods=['GET', 'POST']) #someone has visited base url and we have to provide information
 def menu(): #return some object to be displayed to the user | general python syntax for defining a function
     if request.method == 'POST':
 
         return redirect(url_for('orderStats'))
-
-    return render_template('menu.html') #name='Irfan'
+    mycursor.execute("select  Dish_Name from foodMenu where RestaurantID = '"+ str(currentRestaurant) +"';")
+    result = mycursor.fetchall()
+    rows=[i[0] for i in result]
+    mycursor.execute("select Price from foodMenu where RestaurantID = '"+ str(currentRestaurant) +"';")
+    result2 =mycursor.fetchall()
+    rows2 =  [i[0] for i in result2]
+    return render_template('menu.html', content = rows, prices = rows2) #name='Irfan'
 
 @app.route('/orderStats', methods=['GET', 'POST']) #someone has visited base url and we have to provide information
 def orderStats(): #return some object to be displayed to the user | general python syntax for defining a function
