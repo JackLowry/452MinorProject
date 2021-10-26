@@ -4,15 +4,15 @@
 
 
 
-    <center><form method="post">
+    <center><form action= "{{ url_for('registration_form') }}" method="post">
         <label for="username">Username:</label><br>
         <input type="text" id="username" name="username"><br>
 
         <label for="password">User Password:</label><br>
-        <input type="text" password="fname" name="password"><br>
+        <input type="text" id="username" name="password"><br>
 
-        <label for="street">street:</label><br>
-        <input type="text" id="lname" name="lname"><br>
+        <label for="street">Street:</label><br>
+        <input type="text" id="street" name="street"><br>
 
         <label for="city ">City:</label><br>
         <input type="text" id="city" name="city"><br>
@@ -21,7 +21,7 @@
         <input type="text" id="state" name="state"><br>
 
         <label for="country">Country:</label><br>
-        <input type="text" id="fname" name="fname"><br>
+        <input type="text" id="country" name="country"><br>
 
         <label for="zipcode"> Zipcode:</label><br>
         <input type="text" id="zipcode" name="zipcode"><br>
@@ -38,7 +38,6 @@
 
 
         <button type="submit">Submit Here!</button>
-
 
     </form><center>
 
