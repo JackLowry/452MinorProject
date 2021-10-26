@@ -1,5 +1,5 @@
 #render_template allows for other files to be called in return statements
-from flask import Flask, render_template #import flask into this file and render_template
+from flask import Flask, render_template, request, url_for, redirect#import flask into this file and render_template
 restaurants = ["Applebees", "Olive Garden", "McDonalds", "Popeyes"]
 app = Flask(__name__)
 
@@ -12,6 +12,12 @@ def login(): #return some object to be displayed to the user | general python sy
 @app.route('/about')
 def about(): #name of function and name of route do not have to match
     return 'This is a url shortener'
+
+@app.route('/register', methods=['GET', 'POST'])
+def registration_form():
+    if request.method == 'POST':
+        return redirect(url_for('login'))
+    return render_template('registration_form.html')
 
 @app.route('/Restaurant')
 def dropdown():

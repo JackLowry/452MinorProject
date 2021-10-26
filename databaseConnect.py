@@ -1,6 +1,6 @@
 import mysql.connector
 
-mydb = mysql.connector.connect(host = "localhost", user = "root", passwd = "3072")
+mydb = mysql.connector.connect(host = "localhost", user = "root", passwd = "3072", database ="FreshFood_Database")
 
 
 # to fill it our, since we are poor we are all going to have localhost and root as our user. When you install sql
@@ -15,3 +15,10 @@ if (mydb == None):
 else:
     print("connected")
     print(mydb)
+
+mycursor = mydb.cursor()
+
+mycursor.execute("select * from User_Profile")
+
+for i in mycursor:
+    print(i)
