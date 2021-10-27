@@ -82,9 +82,9 @@ def menu(): #return some object to be displayed to the user | general python syn
     mycursor.execute("select  Dish_Name from foodMenu where RestaurantID = '"+ str(currentRestaurant) +"';")
     result = mycursor.fetchall()
     rows=[i[0] for i in result]
-    mycursor.execute("select Price from foodMenu where RestaurantID = '"+ str(currentRestaurant) +"';")
+    mycursor.execute("select Dish_Name, Price from foodMenu where RestaurantID = '"+ str(currentRestaurant) +"';")
     result2 =mycursor.fetchall()
-    rows2 =  [i[0] for i in result2]
+    rows2 =  result2
     return render_template('menu.html', content = rows, prices = rows2) #name='Irfan'
 
 @app.route('/orderStats', methods=['GET', 'POST']) #someone has visited base url and we have to provide information
