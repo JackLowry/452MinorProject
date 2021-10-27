@@ -22,9 +22,7 @@
         <p><a href="{{ url_for('dropdown') }}">Go Back!</a></p>
     </form>
 
-    <center><h1>Menu Layout</h1></center>
-
-
+    <center><h1>Menu</h1></center>
 
 
 
@@ -34,15 +32,13 @@
       <table class="table table-striped">
       <thead>
       <tr>
-      <th>Dish Name</th>
-      <th>Price</th>
+      <th>Dish Name and Price</th>
       </tr>
       </thead>
       <tbody>
-    {% for dish in content%}
+    {% for price in prices%}
       <tr>
-      <td>{{dish}}</td>
-      <td>prices[{{dish}}]</td>
+      <td>{{price}}</td>
       </tr>
     {% endfor %}
       </tbody>
