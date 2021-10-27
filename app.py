@@ -1,11 +1,39 @@
 #render_template allows for other files to be called in return statements
 from flask import Flask, render_template, request, url_for, redirect#import flask into this file and render_template
 import random
-
+import googlemaps
+import json
+from datetime import datetime
 import mysql.connector #import SQL
+from math import ceil
+
+def optimize_delivery(curr_r, curr_c):
+
+    with open("api_key.txt") as f:
+        api_key = f.read()
+    gmaps = googlemaps.Client(key=api_key)
+
+    deliverers = [(40.50488500478356, -74.4670101053852),
+    (40.523748244622425, -74.47182690442412),
+    (40.501203991220244, -74.41227952116414)]
+
+    min_time = float("inf")
+    best_d = -1
+    to_c = gmaps.directions(curr_r, curr_c, mode="driving")
+    total_time = to_c[0]["legs"][0]["duration"]["value"]
+    for i, d in enumerate(deliverers):
+        to_r = gmaps.directions(d, curr_r, mode="driving")
+        d_time = to_r[0]["legs"][0]["duration"]["value"]
+        print(d_time)
+        if d_time < min_time:
+            min_time = d_time
+            deliverers = i
+    print(total_time, min_time)
+    total_time = total_time + min_time
+    return total_time
 
 
-mydb = mysql.connector.connect(host = "localhost", user = "root", passwd = "3072", database ="FreshFood_Database") #connect to database, bad practive since problems with multiple connecctions and errors can occur, but fine for single user only
+mydb = mysql.connector.connect(host = "localhost", user = "root", passwd = "root", database ="FreshFood_Database") #connect to database, bad practive since problems with multiple connecctions and errors can occur, but fine for single user only
 mycursor = mydb.cursor()
 
 
@@ -65,7 +93,7 @@ def dropdown():
         rest = request.form.get("Restaurants")
         global currentRestaurant
         mycursor.execute("SELECT RestaurantID FROM Restaurant where RestaurantName = '"+ rest +"';")
-        result = mycursor.fetchone()
+        result = mycursor.fetchone()    
         currentRestaurant = result[0]
         print(currentRestaurant)
         return redirect(url_for('menu'))
@@ -91,7 +119,14 @@ def menu(): #return some object to be displayed to the user | general python syn
 def orderStats(): #return some object to be displayed to the user | general python syntax for defining a function
     if request.method == 'POST':
         return redirect(url_for('login'))
-    return render_template('orderStats.html') #name='Irfan'
+    global currentUser, currentRestaurant
+    mycursor.execute("select street, city, state, country, zip_code from Restaurant where RestaurantID = '"+ str(currentRestaurant) +"';")
+    restaurant_loc = ' '.join(mycursor.fetchall()[0])
+    mycursor.execute("select street, city, state, country, zip_code from User_Profile where User_ID = '"+ str(currentUser) +"';")
+    user_loc = ' '.join(mycursor.fetchall()[0])
+    time_to_deliver = ceil(optimize_delivery(restaurant_loc, user_loc)/60)
+    print(restaurant_loc, user_loc, time_to_deliver)
+    return render_template('orderStats.html', delivery_time=time_to_deliver) #name='Irfan'
 
 if __name__ == "__main__":
     app.run()
